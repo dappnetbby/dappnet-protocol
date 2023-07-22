@@ -30,6 +30,10 @@ We extend BitTorrent in the following ways:
 
 Axon complements them. Arweave/Filecoin are good at data storage, though aren't as performant as BitTorrent for data sharing. BitTorrent swarms, while making no guarantees about data storage, are much more scalable when it comes to sharing large data sets worldwide - since anyone can join as a server.
 
+## The end vision.
+
+Buy `hpos10i.eth`, upload .html, pay $USDC for hosting - all in one dapp.
+
 ## Technical proof-of-concept.
 
  - [ ] Modify webtorrent [bittorrent-tracker](https://github.com/webtorrent/bittorrent-tracker) and [node](https://github.com/webtorrent/webtorrent):
