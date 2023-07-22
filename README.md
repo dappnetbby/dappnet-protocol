@@ -26,6 +26,10 @@ We extend BitTorrent in the following ways:
    - The aggregator receives upload/download logs from BitTorrent peers and trackers. It combines these logs using ML to determine a reward distribution for a hosting epoch.
    - It then generates a ZK-STARK which proves this computation, and then posts it on-chain.
 
+## why not arweave/filecoin?
+
+Axon complements them. Arweave/Filecoin are good at data storage, though aren't as performant as BitTorrent for data sharing. BitTorrent swarms, while making no guarantees about data storage, are much more scalable when it comes to sharing large data sets worldwide - since anyone can join as a server.
+
 ## Technical proof-of-concept.
 
  - [ ] Modify webtorrent [bittorrent-tracker](https://github.com/webtorrent/bittorrent-tracker) and [node](https://github.com/webtorrent/webtorrent):
