@@ -37,9 +37,10 @@ Buy `hpos10i.eth`, upload .html, pay $USDC for hosting - all in one dapp.
 ## Technical proof-of-concept.
 
  - [ ] Modify webtorrent [bittorrent-tracker](https://github.com/webtorrent/bittorrent-tracker) and [node](https://github.com/webtorrent/webtorrent):
+   - [x] log upload/downloads to disk (signed).
    - [ ] register public/private keypair for receiving rewards.
-   - [ ] log upload/downloads to disk (signed).
  - [ ] Aggregator 
+   - [x] serve connections over libp2p, receive logs from nodes.
    - [ ] weight upload/download logs by uncertainty using ML/EBSL/EigenTrust.
    - [ ] compute reward matrix from upload/download logs.
    - [ ] generate ZK proof of claim

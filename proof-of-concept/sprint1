@@ -1,0 +1,73 @@
+
+
+on verified piece
+    log the piece to a data structure
+
+
+
+node {
+    peer_id: 0x123123123
+    logs: PieceReceipt[]
+}
+
+PieceReceipt {
+    torrent: id
+    from_peer: peer_id
+    piece: id
+}
+
+
+periodically (every T seconds) commit this log to the aggregator
+aggregator computes each node's contribution
+
+
+
+
+
+where does it make sense to store this?
+how is it communicated to aggregator?
+what are the constraints?
+- HTTP communications
+- signed txs 
+- secure txs.
+
+okay so:
+- generate pub/private keypair using ethers
+- sign statements and send them to aggregator
+- aggregator receives, verifies, inserts into table
+
+
+
+how do we make sure aggregator isnt centralized point of failure?
+we can gossip broadcast this via libp2p if we want
+okay setup libp2p connection 
+and do it that way
+
+
+
+
+reward matrix
+
+
+
+
+we need to detect when a piece is received from a peer
+and log:
+    (torrent, from_peer, to_peer, piece_id, time)
+
+
+
+okay next step
+- compute the matrix of downloads/uploads
+    node upload download
+    remove any entries from nodes that aren't in the network
+- create a simple pool
+    torrent hash
+    tokens
+- join pool using seeder
+    - automatically detect new pools, join them, seed content.
+    - earn tokens.
+
+
+
+

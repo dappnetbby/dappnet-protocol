@@ -1,0 +1,15 @@
+webtorrent docs:
+
+    bittorrent-protocol
+        Wire
+            events:
+    webtorrent
+        Peer
+            type = webrtc | tcp | udp
+            wire = Wire
+        Torrent
+            peers: Peer[]
+
+
+magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4&x.pe=localhost:8001
+

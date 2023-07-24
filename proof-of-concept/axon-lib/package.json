@@ -1,0 +1,33 @@
+{
+  "name": "axonproto-lib",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "build/index.js",
+  "private": true,
+  "scripts": {
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@libp2p/mplex": "^8.0.4",
+    "@libp2p/tcp": "^7.0.3",
+    "@libp2p/webrtc": "^2.0.11",
+    "@types/node": "18.15.11",
+    "@types/react": "18.0.32",
+    "@types/react-dom": "18.0.11",
+    "async": "^3.2.4",
+    "eslint": "8.37.0",
+    "eslint-config-next": "13.2.4",
+    "it-drain": "^3.0.2",
+    "it-first": "^3.0.2",
+    "it-length-prefixed": "^9.0.1",
+    "it-pipe": "^3.0.1",
+    "it-pushable": "^3.2.1",
+    "libp2p": "^0.45.9",
+    "mongodb": "^5.1.0",
+    "next": "13.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.0.3",
+    "zod": "^3.21.4"
+  }
+}
