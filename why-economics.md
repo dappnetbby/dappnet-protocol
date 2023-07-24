@@ -18,3 +18,9 @@ I think this probably matches reality better. Arweave/Filecoin are based on one 
 
 Axon's idea is to be forked. Or more accurately, enable this "forking" aka experimentation within the protocol itself. And the most malleable layer to experiment with is economics. So let's enable that.
 
+## On Payments
+
+One last thing - these networks that already exist kinda constrain themselves due to how their tokenomics is setup. You want people to run P2P nodes, and feel good about doing that. $0.002c/GB is cheaper than cloud providers, but it kinda misses the point of speculating. You want people to put in effort to finding cool datasets, running their node to contribute resources and earn tokens, and then they can use these tokens to use your system. It's a different sort of experience than "buy some $AR and publish some content", because once you've published content the puck kinda stops there. You want to further the feedback loop by generating these speculative games within your protocol - that's the whole point of "not just payments". 
+
+There's a whole host of users out there who would run bittorrent to earn tokens. They would wake up every day and find data that people think is weird and cool, and put in the effort to stake early in different pools and capitalise on the growth in interest of those datasets. 
+
