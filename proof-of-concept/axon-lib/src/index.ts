@@ -10,6 +10,9 @@ import { tcp } from '@libp2p/tcp'
 import { mplex } from '@libp2p/mplex'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { Pushable, pushable } from 'it-pushable'
+// @ts-ignore
+import contracts from './contracts.json' assert { type: "json" };
+import ethers, { Wallet } from 'ethers'
 
 function encode(obj: any) {
   const messageString = JSON.stringify(obj);
@@ -20,8 +23,16 @@ function encode(obj: any) {
 
 export class Node {
   constructor(
+    ethereumWallet: string,
+    private provider: ethers.providers.JsonRpcProvider,
+    public wallet: ethers.Wallet,
     public msgQueue: Pushable<any>
   ) {
+    if (!ethereumWallet.length) {
+      throw new Error('ethereumWallet is required')
+    }
+    this.provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+    this.wallet = new Wallet(ethereumWallet, this.provider)
     this.msgQueue = pushable()
   }
 
@@ -54,17 +65,50 @@ export class Node {
     const stream = await node.dialProtocol(ma, ['/axon-protocol/1.0.0'])
     
     const { msgQueue } = this
-
-    for (let i = 0; i < 2; i++) {
-      msgQueue.push(encode([{ key: 'hello' }]));
-    }
+    msgQueue.push(encode([{ key: 'hello' }]));
 
     pipe(
       msgQueue,
       stream
     )
 
-    msgQueue.push(encode('next'))
+    // Now listen for rewards.
+    const dappnetToken = new ethers.Contract(
+      '0x59b670e9fA9D0A427751Af201D676719a970857b',
+      [
+        'function transfer(address recipient, uint256 amount) public returns (bool)',
+        'function balanceOf(address account) public view returns (uint256)',
+        'event Transfer(address indexed from, address indexed to, uint256 value)'
+      ],
+      this.wallet
+    )
+    dappnetToken.on('Transfer', (from, to, value) => {
+      console.log('Transfer', from, to, value)
+      return
+    })
+
+    const balance = await dappnetToken.balanceOf(this.wallet.address)
+    console.log('balance', balance.toString())
+
+    const System = new ethers.Contract(
+      contracts.System.address,
+      contracts.System.abi,
+      this.wallet
+    )
+
+    setInterval(async () => {
+      // Check for rewards.
+      try {
+        const POOL_ID = '4'
+        console.log('checking for rewards')
+        const award = await System.callStatic.claimRewards(POOL_ID, this.wallet.address)
+        console.log('have rewards')
+        await System.claimRewards(POOL_ID, this.wallet.address)
+      } catch (e) {
+        console.error(e)
+      }
+    }, 1000)
+
   }
 
   async upload(logs: any) {

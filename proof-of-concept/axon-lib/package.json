@@ -17,6 +17,7 @@
     "async": "^3.2.4",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
+    "ethers": "^5.7.2",
     "it-drain": "^3.0.2",
     "it-first": "^3.0.2",
     "it-length-prefixed": "^9.0.1",

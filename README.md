@@ -36,19 +36,19 @@ Buy `hpos10i.eth`, upload .html, pay $USDC for hosting - all in one dapp.
 
 ## Technical proof-of-concept.
 
- - [ ] Modify webtorrent [bittorrent-tracker](https://github.com/webtorrent/bittorrent-tracker) and [node](https://github.com/webtorrent/webtorrent):
+ - [x] Modify webtorrent [bittorrent-tracker](https://github.com/webtorrent/bittorrent-tracker) and [node](https://github.com/webtorrent/webtorrent):
    - [x] log upload/downloads to disk (signed).
-   - [ ] register public/private keypair for receiving rewards.
+   - [x] register public/private keypair for receiving rewards.
  - [ ] Aggregator 
    - [x] serve connections over libp2p, receive logs from nodes.
-   - [ ] weight upload/download logs by uncertainty using ML/EBSL/EigenTrust.
-   - [ ] compute reward matrix from upload/download logs.
+   - [ ] weight upload/download logs by uncertainty using ML/[EBSL](https://en.wikipedia.org/wiki/Subjective_logic)/EigenTrust (in particular, [this ZK implementation](https://github.com/eigen-trust/protocol) by the EF's Privacy Scaling Explorations). 
+   - [x] compute reward matrix from upload/download logs.
    - [ ] generate ZK proof of claim
-   - [ ] submit on-chain
- - [ ] Protocol
-   - [ ] create hosting pool for a single torrent hash
-   - [ ] stake token rewards
-   - [ ] claim rewards
+   - [x] submit on-chain
+ - [x] Protocol
+   - [x] create hosting pool for a single torrent hash
+   - [x] stake token rewards
+   - [x] claim rewards
  - [ ] Axon Desktop client
    - [ ] Runs a torrent client + axon node automatically.
    - [ ] Allows user to simply "join/leave" swarms for different content.
