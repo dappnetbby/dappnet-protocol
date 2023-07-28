@@ -1,6 +1,6 @@
 {
     "System": {
-        "version": 6,
+        "version": 1,
         "abi": [
             {
                 "inputs": [],
@@ -11,19 +11,56 @@
                 "anonymous": false,
                 "inputs": [
                     {
-                        "indexed": false,
+                        "indexed": true,
                         "internalType": "uint256",
                         "name": "poolId",
                         "type": "uint256"
                     },
                     {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "account",
+                        "type": "address"
+                    },
+                    {
                         "indexed": false,
-                        "internalType": "string",
-                        "name": "torrent",
-                        "type": "string"
+                        "internalType": "bool",
+                        "name": "isMember",
+                        "type": "bool"
                     }
                 ],
-                "name": "NewTorrent",
+                "name": "PoolMember",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "uint256",
+                        "name": "poolId",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "string",
+                        "name": "exactTopic",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "uri",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "bool",
+                        "name": "live",
+                        "type": "bool"
+                    }
+                ],
+                "name": "Torrent",
                 "type": "event"
             },
             {
@@ -54,11 +91,21 @@
                     },
                     {
                         "internalType": "string",
-                        "name": "torrent",
+                        "name": "exactTopic",
                         "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "torrentURI",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "insert",
+                        "type": "bool"
                     }
                 ],
-                "name": "addTorrent",
+                "name": "addRemoveTorrent",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
@@ -126,17 +173,51 @@
             {
                 "inputs": [
                     {
+                        "internalType": "uint256[]",
+                        "name": "poolIds",
+                        "type": "uint256[]"
+                    }
+                ],
+                "name": "getPoolInfoBatch",
+                "outputs": [
+                    {
+                        "internalType": "string[]",
+                        "name": "names",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "tickers",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "owners",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "rewardModules",
+                        "type": "address[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
                         "internalType": "uint256",
                         "name": "poolId",
                         "type": "uint256"
                     }
                 ],
-                "name": "getTorrents",
+                "name": "getPoolRewardsModule",
                 "outputs": [
                     {
-                        "internalType": "string[]",
+                        "internalType": "address",
                         "name": "",
-                        "type": "string[]"
+                        "type": "address"
                     }
                 ],
                 "stateMutability": "view",
@@ -151,6 +232,24 @@
                     }
                 ],
                 "name": "initialize",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "poolId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isMember",
+                        "type": "bool"
+                    }
+                ],
+                "name": "joinLeavePool",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
@@ -212,6 +311,11 @@
                         "type": "address"
                     },
                     {
+                        "internalType": "uint256",
+                        "name": "numTorrents",
+                        "type": "uint256"
+                    },
+                    {
                         "internalType": "contract RewardModule",
                         "name": "rewardModule",
                         "type": "address"
@@ -244,7 +348,7 @@
                 "type": "function"
             }
         ],
-        "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-        "deployBlock": 21
+        "address": "0xf4B146FbA71F41E0592668ffbF264F1D186b2Ca8",
+        "deployBlock": 258
     }
 }

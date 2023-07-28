@@ -13,11 +13,14 @@ import { Pushable, pushable } from 'it-pushable'
 // @ts-ignore
 import contracts from './contracts.json' assert { type: "json" };
 import ethers, { Wallet } from 'ethers'
+import debugLib from 'debug'
+const debugAggregator = debugLib('axon:aggregator')
+const debugProtocol = debugLib('axon:protocol')
 
 function encode(obj: any) {
   const messageString = JSON.stringify(obj);
   const enc = uint8ArrayFromString(messageString)
-  // console.log('Sent message:', messageString);
+  // debug('Sent message:', messageString);
   return enc
 }
 
@@ -49,18 +52,18 @@ export class Node {
 
     // start libp2p
     await node.start()
-    console.log('libp2p has started')
+    debugAggregator('libp2p has started')
 
     // print out listening addresses
-    console.log('listening on addresses:')
+    debugAggregator('listening on addresses:')
     node.getMultiaddrs().forEach((addr) => {
-      console.log(addr.toString())
+      debugAggregator(addr.toString())
     })
 
     await node.start()
 
     const AGGREGATOR_ADDR = `/ip4/127.0.0.1/tcp/49852/p2p/16Uiu2HAmUvAB48Xn9aB4db7rVz53EwbqjoJhy94fSGg9xVFt6Te1`
-    console.log(`connecting to axon aggregator, address ${AGGREGATOR_ADDR}`)
+    debugAggregator(`connecting to axon aggregator, address ${AGGREGATOR_ADDR}`)
     const ma =  multiaddr(AGGREGATOR_ADDR)
     const stream = await node.dialProtocol(ma, ['/axon-protocol/1.0.0'])
     
@@ -83,12 +86,12 @@ export class Node {
       this.wallet
     )
     dappnetToken.on('Transfer', (from, to, value) => {
-      console.log('Transfer', from, to, value)
+      debugProtocol('Transfer', from, to, value)
       return
     })
 
     const balance = await dappnetToken.balanceOf(this.wallet.address)
-    console.log('balance', balance.toString())
+    debugProtocol('balance', balance.toString())
 
     const System = new ethers.Contract(
       contracts.System.address,
@@ -100,14 +103,14 @@ export class Node {
       // Check for rewards.
       try {
         const POOL_ID = '4'
-        console.log('checking for rewards')
+        debugProtocol('checking for rewards')
         const award = await System.callStatic.claimRewards(POOL_ID, this.wallet.address)
-        console.log('have rewards')
+        debugProtocol('have rewards')
         await System.claimRewards(POOL_ID, this.wallet.address)
       } catch (e) {
         console.error(e)
       }
-    }, 1000)
+    }, 20_000)
 
   }
 

@@ -18,11 +18,18 @@ contract FixedERC20RewardModule is RewardModule {
         rewardToken = ERC20(_rewardToken);
     }
 
+    function unclaimedRewards(
+        address account,
+        uint256 upload
+    ) external view returns (uint256) {
+        return upload - claimed[account];
+    }
+    
     function claimReward(WorkInfo memory workInfo) external override returns (uint256) {
         // TODO permission so only System can call.
         require(rewardToken.balanceOf(address(this)) >= workInfo.upload, "axon: Not enough reward tokens");
         
-        uint256 award = workInfo.upload - claimed[workInfo.account];
+        uint256 award = this.unclaimedRewards(workInfo.account, workInfo.upload);
         if(award == 0) revert("axon: No rewards to claim");
         
         rewardToken.transfer(workInfo.account, award);
@@ -33,7 +40,5 @@ contract FixedERC20RewardModule is RewardModule {
         return award;
     }
 
-    // function availableRewards(address account) external view returns (uint256) {
-    //     return rewardToken.balanceOf(address(this)) - claimed[account];
-    // }
+
 }

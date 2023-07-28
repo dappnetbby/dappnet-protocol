@@ -9,3 +9,6 @@
 [submodule "proof-of-concept/webtorrent-cli"]
 	path = proof-of-concept/webtorrent-cli
 	url = https://github.com/dappnetbby/webtorrent-cli
+[submodule "proof-of-concept/protocol/lib/niacin-contracts"]
+	path = proof-of-concept/protocol/lib/niacin-contracts
+	url = https://github.com/liamzebedee/niacin-contracts

@@ -49,6 +49,8 @@ Buy `hpos10i.eth`, upload .html, pay $USDC for hosting - all in one dapp.
    - [x] create hosting pool for a single torrent hash
    - [x] stake token rewards
    - [x] claim rewards
+ - [x] Node
+   - [x] Automatically seed torrents for pools a user has joined.
  - [ ] Axon Desktop client
    - [ ] Runs a torrent client + axon node automatically.
    - [ ] Allows user to simply "join/leave" swarms for different content.

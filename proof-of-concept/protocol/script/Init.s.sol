@@ -38,7 +38,12 @@ contract InitScript is Script {
             
             // Setup pool.
             uint256 poolId = sys.createPool("sintel", "SINTEL", rewardModule);
-            sys.addTorrent(poolId, "magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4&x.pe=localhost:24333");
+            sys.addRemoveTorrent(
+                poolId, 
+                "6a9759bffd5c0af65319979fb7832189f4f3c35d",
+                "magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4&x.pe=localhost:24333",
+                true
+            );
         }
         if(migrateFrom < 2) {
             // peer: seed.js

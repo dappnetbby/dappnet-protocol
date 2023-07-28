@@ -123,8 +123,9 @@ async function computeRewards() {
         wallet
     )
 
+    const POOL_ID = '1' // TODO:axon
     const tx = await System.updateWorkMatrix(
-        '4', // TODO:axon
+        POOL_ID,
         rewardMatrix.map(({ peer_eth_wallet }) => peer_eth_wallet),
         rewardMatrix.map(({ upload }) => upload),
     )
