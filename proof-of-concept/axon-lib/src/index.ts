@@ -45,7 +45,11 @@ export class Node {
         // add a listen address (localhost) to accept TCP connections on a random port
         listen: ['/ip4/127.0.0.1/tcp/0']
       },
-      transports: [tcp()],
+      transports: [tcp({
+        // TODO:axon
+        inboundSocketInactivityTimeout: 0,
+        outboundSocketInactivityTimeout: 0
+      })],
       connectionEncryption: [noise()],
       streamMuxers: [mplex()]
     })
@@ -76,41 +80,41 @@ export class Node {
     )
 
     // Now listen for rewards.
-    const dappnetToken = new ethers.Contract(
-      '0x59b670e9fA9D0A427751Af201D676719a970857b',
-      [
-        'function transfer(address recipient, uint256 amount) public returns (bool)',
-        'function balanceOf(address account) public view returns (uint256)',
-        'event Transfer(address indexed from, address indexed to, uint256 value)'
-      ],
-      this.wallet
-    )
-    dappnetToken.on('Transfer', (from, to, value) => {
-      debugProtocol('Transfer', from, to, value)
-      return
-    })
+    // const dappnetToken = new ethers.Contract(
+    //   '0x59b670e9fA9D0A427751Af201D676719a970857b',
+    //   [
+    //     'function transfer(address recipient, uint256 amount) public returns (bool)',
+    //     'function balanceOf(address account) public view returns (uint256)',
+    //     'event Transfer(address indexed from, address indexed to, uint256 value)'
+    //   ],
+    //   this.wallet
+    // )
+    // dappnetToken.on('Transfer', (from, to, value) => {
+    //   debugProtocol('Transfer', from, to, value)
+    //   return
+    // })
 
-    const balance = await dappnetToken.balanceOf(this.wallet.address)
-    debugProtocol('balance', balance.toString())
+    // const balance = await dappnetToken.balanceOf(this.wallet.address)
+    // debugProtocol('balance', balance.toString())
 
-    const System = new ethers.Contract(
-      contracts.System.address,
-      contracts.System.abi,
-      this.wallet
-    )
+    // const System = new ethers.Contract(
+    //   contracts.System.address,
+    //   contracts.System.abi,
+    //   this.wallet
+    // )
 
-    setInterval(async () => {
-      // Check for rewards.
-      try {
-        const POOL_ID = '4'
-        debugProtocol('checking for rewards')
-        const award = await System.callStatic.claimRewards(POOL_ID, this.wallet.address)
-        debugProtocol('have rewards')
-        await System.claimRewards(POOL_ID, this.wallet.address)
-      } catch (e) {
-        console.error(e)
-      }
-    }, 20_000)
+    // setInterval(async () => {
+    //   // Check for rewards.
+    //   try {
+    //     const POOL_ID = '4'
+    //     debugProtocol('checking for rewards')
+    //     const award = await System.callStatic.claimRewards(POOL_ID, this.wallet.address)
+    //     debugProtocol('have rewards')
+    //     await System.claimRewards(POOL_ID, this.wallet.address)
+    //   } catch (e) {
+    //     console.error(e)
+    //   }
+    // }, 20_000)
 
   }
 

@@ -35,7 +35,11 @@ async function main() {
       // add a listen address (localhost) to accept TCP connections on a random port
       listen: ['/ip4/127.0.0.1/tcp/49852']
     },
-    transports: [tcp()],
+    transports: [tcp({
+      // TODO:axon
+      inboundSocketInactivityTimeout: 0,
+      outboundSocketInactivityTimeout: 0
+    })],
     connectionEncryption: [noise()],
     streamMuxers: [mplex()],
     peerId: id

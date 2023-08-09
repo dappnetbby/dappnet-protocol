@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "private": true,
   "scripts": {
+    "start": "node build/index.js",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
     "ethers": "^5.7.2",
+    "express": "^4.18.2",
     "it-drain": "^3.0.2",
     "it-map": "^3.0.3",
     "libp2p": "^0.45.9",

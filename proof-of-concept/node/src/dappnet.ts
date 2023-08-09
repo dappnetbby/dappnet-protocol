@@ -16,6 +16,12 @@ yargs(hideBin(process.argv))
                 type: 'string',
                 description: 'path to the torrent data directory',
             })
+            .option('torrent-port', {
+                required: true,
+                type: 'number',
+                default: 24333,
+                description: 'port to use for torrenting',
+            })
     }, runNode)
     .help()
     .demandCommand()

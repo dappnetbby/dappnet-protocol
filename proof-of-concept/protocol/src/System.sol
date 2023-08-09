@@ -1,19 +1,50 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {RewardModule, WorkInfo} from "./RewardModule.sol";
+import {MixinInitializable} from "niacin-contracts/mixins/MixinInitializable.sol";
+import {RewardModule, WorkInfo} from "./rewards/RewardModule.sol";
+import {TorrentUtils} from "./lib/TorrentUtils.sol";
 
 struct Pool {
+    // Unique pool ID.
     uint256 id;
+    
+    // Name of pool.
     string name;
+    
+    // Ticker for pool.
     string ticker;
+
+    // Description for pool.
+    string description;
+
+    // Owner of pool.
     address owner;
+
+    // ---------
+    // Torrents.
+    // ---------
+
+    // Number of torrents in pool.
     uint256 numTorrents;
+
+    // Number of members of pool.
+    uint256 numMembers;
+
     // Mapping of torrent.exactHash -> PoolTorrent.
     mapping(string => PoolTorrent) torrents;
+
+    // ---------
+    // Rewards.
+    // ---------
+    
     // Mapping of account -> upload.
     mapping(address => uint256) workMatrix;
+
+    // User-defined reward module for pool.
     RewardModule rewardModule;
+    
+    // Members of pool.
     mapping(address => PoolMembership) members;
 }
 
@@ -32,45 +63,29 @@ struct PoolTorrent {
     // [1]: https://en.wikipedia.org/wiki/Magnet_URI_scheme
 }
 
-library TorrentUtils {
-    function validateExactTopic(string memory exactTopic) internal pure returns (bool) {
-        
-        // 
-        // Validate exactTopic matches a hex or base32 string.
-        // This matches all modern magnet link content addressing schemes:
-        // 
-        // SHA-1                               xt=urn:sha1:[ SHA-1 Hash (Base32) ]
-        // BitTorrent info hash (BTIH)         xt=urn:btih:[ BitTorrent Info Hash (Hex) ]
-        // BitTorrent info hash v2 (BTMH)      xt=urn:btmh:[ BitTorrent Info Hash (Hex) ]
-        // Direct Connect, Gnutella            xt=urn:tree:tiger:[ TTH Hash (Base32) ]
-        // 
-        for (uint256 i = 0; i < bytes(exactTopic).length; i++) {
-            bytes1 char = bytes(exactTopic)[i];
-            if (
-                !(char >= bytes1("0") && char <= bytes1("9")) &&
-                !(char >= bytes1("a") && char <= bytes1("f")) &&
-                !(char >= bytes1("A") && char <= bytes1("F")) &&
-                !(char >= bytes1("2") && char <= bytes1("7"))
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
+struct AggregatorInfo {
+    // libp2p multiaddress for connecting to aggregator.
+    // used by nodes to report their work.
+    string multiaddr;
 }
+
+
 
 contract System {
     uint256 public poolCount;
     mapping(uint256 => Pool) public pools;
     address public operator;
+    AggregatorInfo public aggregator;
 
+    event PoolCreated(uint256 indexed poolId, string indexed name, string indexed ticker);
     event PoolMember(uint256 indexed poolId, address indexed account, bool isMember);
     event Torrent(uint256 indexed poolId, string indexed exactTopic, string uri, bool live);
     event WorkMatrixUpdate(uint256 poolId, uint256 blockNumber);
 
     constructor() {}
 
-    function initialize(address _operator) external {
+    // TODO AXON
+    function configure(address _operator) external {
         require(operator == address(0), "axon: Already initialized");
         operator = _operator;
     }
@@ -78,16 +93,28 @@ contract System {
     function createPool(
         string memory name,
         string memory ticker,
-        RewardModule rewardModule 
+        string memory description,
+        RewardModule rewardModule
     ) external returns (uint256) {
-        poolCount++;
         Pool storage pool = pools[poolCount];
         pool.id = poolCount;
         pool.name = name;
         pool.ticker = ticker;
+        pool.description = description;
         pool.owner = msg.sender;
         pool.rewardModule = rewardModule;
+        emit PoolCreated(pool.id, name, ticker);
+        poolCount++;
         return pool.id;
+    }
+
+    function setAggregator(
+        string calldata multiaddr
+    ) external {
+        require(msg.sender == operator, "axon: Only operator can set aggregator");
+        aggregator = AggregatorInfo({
+            multiaddr: multiaddr
+        });
     }
 
     function updateWorkMatrix(
@@ -129,33 +156,44 @@ contract System {
     )
         external
     {
-        require(poolId <= poolCount, "axon: Pool does not exist");
-        Pool storage pool = pools[poolId];
         address account = msg.sender;
-        pool.members[account].isMember = isMember;
         emit PoolMember(poolId, account, isMember);
+        
+        require(poolId <= poolCount, "axon: Pool does not exist");
+
+        Pool storage pool = pools[poolId];
+        pool.members[account].isMember = isMember;
+
+        if(isMember) {
+            pool.numMembers++;
+        } else {
+            if(pool.numMembers == 0) {
+                revert("axon: no members to leave");
+            }
+            pool.numMembers--;
+        }
     }
 
     function addRemoveTorrent(
         uint256 poolId,
         string memory exactTopic,
         string memory torrentURI,
-        bool insert
+        bool live
     ) external {
         require(poolId <= poolCount, "axon: Pool does not exist");
         Pool storage pool = pools[poolId];
         require(pool.owner == msg.sender, "axon: Only owner can add torrent");
         require(TorrentUtils.validateExactTopic(exactTopic), "axon: torrent.exactTopic invalid");
 
-        if(insert) {
-            // Case: INSERT.
+        if(live) {
+            // Case: ADD.
             pool.torrents[exactTopic] = PoolTorrent({
                 exactTopic: exactTopic,
                 uri: torrentURI
             });
             pool.numTorrents++;
         } else {
-            // Case: DELETE.
+            // Case: REMOVE.
             PoolTorrent memory emptyTorrent;
             pool.torrents[exactTopic] = emptyTorrent;
             if(pool.numTorrents == 0) {
@@ -164,7 +202,47 @@ contract System {
             pool.numTorrents--;
         }
 
-        emit Torrent(poolId, exactTopic, torrentURI, insert);
+        emit Torrent(poolId, exactTopic, torrentURI, live);
+    }
+
+    function getPoolInfo(
+        uint256 poolId
+    )
+        external 
+        view
+        returns (
+            string memory name,
+            string memory ticker,
+            string memory description,
+            address owner,
+            uint256 numTorrents,
+            uint256 numMembers,
+            address rewardModule
+        )
+    {
+        Pool storage pool = pools[poolId];
+
+        return (
+            pool.name,
+            pool.ticker,
+            pool.description,
+            pool.owner,
+            pool.numTorrents,
+            pool.numMembers,
+            address(pool.rewardModule)
+        );
+    }
+
+    function isMember(
+        uint256 poolId,
+        address account
+    )
+        external
+        view
+        returns (bool)
+    {
+        Pool storage pool = pools[poolId];
+        return pool.members[account].isMember;
     }
 
     function getPoolInfoBatch(

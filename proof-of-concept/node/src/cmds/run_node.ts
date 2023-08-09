@@ -23,9 +23,12 @@ import EventEmitter from 'events'
 
 // Torrent(uint256 indexed poolId, string indexed exactTopic, string uri, bool live);
 const getTorrentsForPool = async (System: ethers.Contract, poolId: string) => {
-    const torrentEvents = await System.queryFilter(System.filters.Torrent(poolId, null))
+    debug('getTorrentsForPool', 'poolId='+poolId)
+    const torrentEvents = await System.queryFilter(System.filters.Torrent(poolId, null), 0, 'latest')
+    debug('getTorrentsForPool', 'poolId=' + poolId, '->', torrentEvents)
     const torrentURIs = new Set()
     torrentEvents.forEach(event => {
+        debug('Torrent', event)
         const { exactTopic, uri, live } = event.args
         // TODO:axon verify exactTopic in URI
         if (live) torrentURIs.add(uri)
@@ -53,6 +56,7 @@ class StateEngine extends EventEmitter {
         debug(`Loading pools for ${this.account}`)
         const events = await System.queryFilter(System.filters.PoolMember(null, this.account))
         debug(`Found ${events.length} events`)
+        
 
         // Pools
         const poolIds = new Set()
@@ -79,7 +83,7 @@ class StateEngine extends EventEmitter {
         const torrentsForPools = await Promise.all(
             poolIdsArray.map(poolId => getTorrentsForPool(System, poolId))
         )
-        debug(torrentsForPools)
+        debug('torrentsForPools', torrentsForPools)
 
         let poolsData: Record<string, any> = {}
         poolIdsArray.forEach((poolId, i) => {
@@ -94,7 +98,8 @@ class StateEngine extends EventEmitter {
                 poolId,
                 name,
                 ticker,
-                torrents: torrentsForPools[i]
+                torrents: torrentsForPools[i],
+                isMember: true
             }
         })
 
@@ -103,7 +108,7 @@ class StateEngine extends EventEmitter {
         this.emit('update', this.pools)
     }
 
-    listen() {
+    async listen() {
         const logEvent = (event) => {
             const { event, args } = event
             debug('event', event.event)
@@ -112,15 +117,29 @@ class StateEngine extends EventEmitter {
             // }
         }
 
+        // WORKAROUND: ethers.js replaying events from 1 block in the past on Hardhat
+        // https://github.com/ethers-io/ethers.js/discussions/1939 
+        const startBlockNumber = await this.System.provider.getBlockNumber();
+        const isEventInPast = (event) => {
+            if (event.blockNumber <= startBlockNumber) return true;
+            return false
+        }
+
         // Listen for changes in the state.
         this.System.on('PoolMember', (event: any) => {
             const event = Array.from(arguments).pop()
+            if (isEventInPast(event)) return
+
+            // TODO: filter
             debug('event', 'PoolMember')
             this.processPoolMember(event)
         })
 
         this.System.on('Torrent', () => {
             const event = Array.from(arguments).pop()
+            if (isEventInPast(event)) return
+
+            // TODO: filter
             debug('event', 'Torrent')
             this.processTorrentEvent(event)
         })
@@ -139,14 +158,50 @@ class StateEngine extends EventEmitter {
         }
     }
 
-    processPoolMember(event: any) {
+    async processPoolMember(event: any) {
         const { poolId: poolBN, isMember } = event.args
         const pool = poolBN.toString()
+
+        const { System } = this
+        const poolId = poolBN.toNumber()
+
+        if (isMember) {
+            const poolInfos = await System.getPoolInfoBatch([poolBN])
+            const torrents = await getTorrentsForPool(System, poolId)
+
+            const [
+                name,
+                ticker,
+            ] = [
+                poolInfos.names[0],
+                poolInfos.tickers[0],
+            ];
+            
+            this.pools[poolId] = {
+                poolId,
+                name,
+                ticker,
+                isMember: true,
+                torrents: torrents,
+            }
+        } else {
+            this.pools[poolId] = {
+                ...this.pools[poolId],
+                isMember: false,
+            }
+        }
+
+        this.emit('update', this.pools)
     }
 
     processTorrentEvent(event: any) {
         const { poolId: poolBN, exactTopic, uri, live } = event.args
         const pool = this.pools[poolBN.toString()]
+
+        if (!pool) {
+            debug(`Pool ${poolBN.toString()} not found`)
+            return
+        }
 
         // TODO:axon verify exactTopic in URI
         const torrentsSet = new Set()
@@ -173,23 +228,27 @@ class TorrentEngine {
     constructor(
         private stateEngine: StateEngine,
         private privateKey: string,
+        private torrentPort: number
     ) {
         this.stateEngine = stateEngine
+        debug('starting WebTorrent on port ' + torrentPort)
         this.torrentClient = new WebTorrent({
             ethereumWallet: privateKey,
             peerId: '1'.repeat(40),
             tracker: true,
-            torrentPort: 24333,
+            torrentPort,
         })
         this.torrents = {}
     }
 
     start() {
         this.stateEngine.on('update', (pools) => {
-            debug('state update')
+            debug('processing state update', pools)
             const torrentURIs = new Set()
 
             Object.values(pools).forEach((pool: any) => {
+                if(!pool.isMember) return
+
                 pool.torrents.forEach((uri: string) => {
                     torrentURIs.add(uri)
                 })
@@ -201,6 +260,7 @@ class TorrentEngine {
                     // Stop torrent.
                     debug(`Stopping torrent: ${uri}`)
                     const torrent = this.torrentClient.remove(uri)
+                    delete this.torrents[uri]
                 }
             }
 
@@ -223,6 +283,7 @@ class TorrentEngine {
 
 interface RunNodeArgs {
     torrentDataPath: string
+    torrentPort: number
 }
 
 export async function runNode(argv: RunNodeArgs) {
@@ -286,7 +347,8 @@ export async function runNode(argv: RunNodeArgs) {
 
     let torrentEngine = new TorrentEngine(
         stateEngine,
-        PRIVATE_KEY
+        PRIVATE_KEY,
+        argv.torrentPort
     )
     torrentEngine.start()
 

@@ -1,19 +1,19 @@
 {
-  "name": "dappnet-cli",
-  "version": "1.0.0",
+  "name": "axon-protocol-cli",
+  "version": "0.1.0-alpha",
   "description": "",
-  "main": "dist/dappnet.js",
+  "main": "dist/axon.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "run": "node build/dappnet.js"
+    "run": "node build/axon.js"
   },
   "files": [
     "bin/",
-    "dist/"
+    "build/"
   ],
   "bin": {
-    "dappnet": "bin/dappnet.js"
+    "axond": "bin/axon.js"
   },
   "keywords": [],
   "author": "",

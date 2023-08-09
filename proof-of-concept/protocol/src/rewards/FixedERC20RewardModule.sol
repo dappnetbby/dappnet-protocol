@@ -1,6 +1,6 @@
 
 import "./RewardModule.sol";
-import "./ERC20.sol";
+import "../token/ERC20.sol";
 
 contract FixedERC20RewardModule is RewardModule {
     address public operator;

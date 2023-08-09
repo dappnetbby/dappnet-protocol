@@ -1,0 +1,123 @@
+- [ ] fix the rewards
+    rewards(pool_id) -> (claimed, earnings)
+
+
+interface:
+
+- connect contracts for env
+- dash:
+    feature a set few pools
+- pool:
+    load:
+        isMember
+        pool details
+        
+        listen:
+            members events
+            torrent events
+        
+        poll:
+            your total upload
+            unclaimed rewards
+            
+            realtime download rate
+        
+        aggregator:
+            serve endpoint for each pool:
+                (t, downloaded)
+            load download rates from aggregator
+        
+        interactions:
+            join pool
+            leave pool
+            claim tokens
+
+
+what's the simplest thing I can do today?
+
+- package the node software for npm + publish
+- deploy contracts to anvil
+- run+build aggregator
+- run node software
+- create a pool using Init.s.sol
+- view it in the dapp
+- join the pool in the dapp
+- watch as node autojoins and seeds torrent
+- start a downloader
+- watch as reports flow into aggregator
+- check dapp
+- (rewards, download) should refresh in realtime.
+
+then for demo:
+- issue the axon token
+- user flow:
+    install the axon-miner
+    join the "stupid dummy dataset" pool
+    watch as other people download the dataset
+        view a video
+    earn tokens!
+    use those tokens to create your own pool
+        upload a file to arweave
+        then create an onchain pool
+        watch as nodes spin up to host the file
+
+
+what does this entail?
+- aggregator
+    serve endpoint for realtime upload/downloads
+    serve endpoint for "total uploaded"
+- dapp
+    integrate wagmi
+    load pool data from on-chain
+        name
+        symbol
+    build "join/leave" button
+    build "get rewards"
+        req from aggregator
+    build "get your upload"
+        req from aggregator
+    build "realtime view downloads"
+        req from aggregator
+    build "is node live" indicator
+        req from node
+- token
+    issue axon token
+    setup pool so that people can earn axon for hosting
+
+
+
+
+
+- integration
+    run node with key
+
+
+
+
+
+
+
+
+
+other stuff:
+- create pool
+    upload files
+    add tokens
+- pool
+    edit details
+    propose new files
+    buy/sell tokens to propose new files??
+        issue AXON token to hosters
+        nodes earn it for hosting data
+        users can buy and stake it in order to get rewards
+        users can buy and pay it in order to get data hosted
+
+
+    zk gate tokens in pool
+
+
+
+- earnings
+
+- node
+    show if node is online / responding to heartbeat
