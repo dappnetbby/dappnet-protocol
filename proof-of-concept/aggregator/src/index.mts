@@ -21,7 +21,7 @@ async function main() {
   })
 
   try {
-    await db.exec('CREATE TABLE peer_logs (eth_wallet TEXT, key TEXT, torrent TEXT, from_peer TEXT, to_peer TEXT, piece INT)')
+    await db.exec('CREATE TABLE peer_logs (eth_wallet TEXT, key TEXT, torrent TEXT, from_peer TEXT, to_peer TEXT, piece INT, time INT)')
   } catch(err) {}
 
   // const prvkey = await generateKeyPair('secp256k1')
@@ -80,7 +80,7 @@ async function main() {
           console.log(logs)
           let insertQuery =
             "INSERT INTO peer_logs " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
           let statement = await db.prepare(insertQuery);
           
           for (let log of logs) {
@@ -90,7 +90,8 @@ async function main() {
               torrent,
               from_peer,
               to_peer,
-              piece
+              piece,
+              time
             } = log
 
             if(key === 'hello') continue
@@ -101,7 +102,8 @@ async function main() {
               torrent,
               from_peer,
               to_peer,
-              piece
+              piece,
+              time
             ])
           }
 

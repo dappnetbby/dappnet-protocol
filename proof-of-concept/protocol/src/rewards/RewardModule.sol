@@ -1,3 +1,4 @@
+pragma solidity ^0.8.17;
 
 struct WorkInfo {
     uint256 upload;

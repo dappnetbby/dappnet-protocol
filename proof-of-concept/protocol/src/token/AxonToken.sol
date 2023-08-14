@@ -1,3 +1,4 @@
+pragma solidity ^0.8.17;
 
 import {MixinInitializable} from "niacin-contracts/mixins/MixinInitializable.sol";
 import {ERC20} from "./ERC20.sol";

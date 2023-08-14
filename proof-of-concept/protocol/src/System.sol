@@ -70,16 +70,32 @@ struct AggregatorInfo {
 }
 
 
+library StringUtils {
+    function toBytes32(string memory self) internal pure returns (bytes32) {
+        require(bytes(self).length <= 32, "Input string too long");
+        
+        bytes32 result;
+        assembly {
+            result := mload(add(self, 32))
+        }
+        return result;
+    }
+}
+
 
 contract System {
+    /// @notice State.
     uint256 public poolCount;
     mapping(uint256 => Pool) public pools;
     address public operator;
     AggregatorInfo public aggregator;
 
-    event PoolCreated(uint256 indexed poolId, string indexed name, string indexed ticker);
+    /// @notice Events.
+    /// @dev `name` is a string, although we type it as `bytes32` in order to extract it. [1]
+    /// [1] https://ethereum.stackexchange.com/questions/6840/indexed-event-with-string-not-getting-logged 
+    event PoolCreated(uint256 indexed poolId, bytes32 indexed name, string indexed ticker);
     event PoolMember(uint256 indexed poolId, address indexed account, bool isMember);
-    event Torrent(uint256 indexed poolId, string indexed exactTopic, string uri, bool live);
+    event Torrent(uint256 indexed poolId, bytes32 indexed exactTopic, string uri, bool live);
     event WorkMatrixUpdate(uint256 poolId, uint256 blockNumber);
 
     constructor() {}
@@ -103,7 +119,12 @@ contract System {
         pool.description = description;
         pool.owner = msg.sender;
         pool.rewardModule = rewardModule;
-        emit PoolCreated(pool.id, name, ticker);
+        emit PoolCreated(
+            pool.id, 
+            // name.toBytes32(),
+            hex"",
+            ticker
+        );
         poolCount++;
         return pool.id;
     }
@@ -177,6 +198,7 @@ contract System {
     function addRemoveTorrent(
         uint256 poolId,
         string memory exactTopic,
+        bytes32 xtBytes,
         string memory torrentURI,
         bool live
     ) external {
@@ -194,15 +216,19 @@ contract System {
             pool.numTorrents++;
         } else {
             // Case: REMOVE.
-            PoolTorrent memory emptyTorrent;
-            pool.torrents[exactTopic] = emptyTorrent;
+            delete pool.torrents[exactTopic];
             if(pool.numTorrents == 0) {
                 revert("axon: no torrents to remove");
             }
             pool.numTorrents--;
         }
 
-        emit Torrent(poolId, exactTopic, torrentURI, live);
+        emit Torrent(
+            poolId, 
+            xtBytes,
+            torrentURI, 
+            live
+        );
     }
 
     function getPoolInfo(

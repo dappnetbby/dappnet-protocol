@@ -1,3 +1,4 @@
+pragma solidity ^0.8.17;
 
 import "./RewardModule.sol";
 import "../token/ERC20.sol";

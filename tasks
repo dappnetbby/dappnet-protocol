@@ -71,7 +71,7 @@ what does this entail?
     load pool data from on-chain
         name
         symbol
-    build "join/leave" button
+    [x] build "join/leave" button
     build "get rewards"
         req from aggregator
     build "get your upload"

@@ -1,0 +1,6 @@
+e2e test:
+
+- run the aggregator and api server
+- run an axon seeder node
+- report their uploads to the aggregator
+- 

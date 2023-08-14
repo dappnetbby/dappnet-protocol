@@ -9,7 +9,7 @@ You can join/leave hosting pools through the dapp, and the node will listen for 
 
 ### v1.
 
- - [ ] Automatically listen to pools joined/left by the user.
+ - [x] Automatically listen to pools joined/left by the user.
  - [x] Automatically start seeding torrents in these pools.
  - [x] Automatically torrent and untorrent based on on-chain events.
 

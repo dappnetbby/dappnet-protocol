@@ -8,277 +8,10 @@ const __dirname = path.dirname(__filename);
 import debugLib from 'debug'
 const debug = debugLib('axon:node')
 import EventEmitter from 'events'
-
-
-
-
-// 
-// PoolMember -> isMember? (yes) -> new pool    -> load torrents -> add torrents
-//                         (no)  -> delete pool -> remove torrents 
-// 
-// Torrent    -> live?     (yes) -> add torrent
-//                         (no)  -> remove torrent
-// 
-
-
-// Torrent(uint256 indexed poolId, string indexed exactTopic, string uri, bool live);
-const getTorrentsForPool = async (System: ethers.Contract, poolId: string) => {
-    debug('getTorrentsForPool', 'poolId='+poolId)
-    const torrentEvents = await System.queryFilter(System.filters.Torrent(poolId, null), 0, 'latest')
-    debug('getTorrentsForPool', 'poolId=' + poolId, '->', torrentEvents)
-    const torrentURIs = new Set()
-    torrentEvents.forEach(event => {
-        debug('Torrent', event)
-        const { exactTopic, uri, live } = event.args
-        // TODO:axon verify exactTopic in URI
-        if (live) torrentURIs.add(uri)
-        else torrentURIs.delete(uri)
-    })
-    return Array.from(torrentURIs)
-}
-
-class StateEngine extends EventEmitter {
-    public pools: Record<string, any>
-
-    constructor(
-        public System: ethers.Contract,
-        public account: string
-    ) {
-        super()
-        this.System = System
-        this.account = account
-        this.pools = {}
-    }
-
-    async load() {
-        const { System } = this
-        // Now load all events and reduce them into the pools a user should be a part of.
-        debug(`Loading pools for ${this.account}`)
-        const events = await System.queryFilter(System.filters.PoolMember(null, this.account))
-        debug(`Found ${events.length} events`)
-        
-
-        // Pools
-        const poolIds = new Set()
-        events.reduce((acc, event) => {
-            const { poolId: poolBN, isMember } = event.args
-            const pool = poolBN.toString()
-
-            if (isMember) {
-                poolIds.add(pool)
-            } else if (!isMember) {
-                poolIds.delete(pool)
-            }
-        }, [])
-
-        // Now get the info for all of these pools.
-        // Using multicall.
-        debug(`Member of ${poolIds.size} pool(s)`)
-        poolIds.forEach(pool => debug(`- ${pool}`))
-        const poolIdsArray = Array.from(poolIds)
-        const poolInfos = await System.getPoolInfoBatch(poolIdsArray)
-
-        // Now load all torrents for all pools.
-        debug("Loading torrents for pools")
-        const torrentsForPools = await Promise.all(
-            poolIdsArray.map(poolId => getTorrentsForPool(System, poolId))
-        )
-        debug('torrentsForPools', torrentsForPools)
-
-        let poolsData: Record<string, any> = {}
-        poolIdsArray.forEach((poolId, i) => {
-            const [
-                name,
-                ticker,
-            ] = [
-                poolInfos.names[i],
-                poolInfos.tickers[i],
-            ]
-            poolsData[poolId] = {
-                poolId,
-                name,
-                ticker,
-                torrents: torrentsForPools[i],
-                isMember: true
-            }
-        })
-
-        this.pools = poolsData
-
-        this.emit('update', this.pools)
-    }
-
-    async listen() {
-        const logEvent = (event) => {
-            const { event, args } = event
-            debug('event', event.event)
-            // for(let [k,v] of ) {
-            //     // if arg is 
-            // }
-        }
-
-        // WORKAROUND: ethers.js replaying events from 1 block in the past on Hardhat
-        // https://github.com/ethers-io/ethers.js/discussions/1939 
-        const startBlockNumber = await this.System.provider.getBlockNumber();
-        const isEventInPast = (event) => {
-            if (event.blockNumber <= startBlockNumber) return true;
-            return false
-        }
-
-        // Listen for changes in the state.
-        this.System.on('PoolMember', (event: any) => {
-            const event = Array.from(arguments).pop()
-            if (isEventInPast(event)) return
-
-            // TODO: filter
-            debug('event', 'PoolMember')
-            this.processPoolMember(event)
-        })
-
-        this.System.on('Torrent', () => {
-            const event = Array.from(arguments).pop()
-            if (isEventInPast(event)) return
-
-            // TODO: filter
-            debug('event', 'Torrent')
-            this.processTorrentEvent(event)
-        })
-    }
-
-    async _loadPool(id: string) {
-        // Get pool info.
-        const poolInfo = await this.System.getPoolInfoBatch([id])
-        const [[name, ticker]] = poolInfo
-        const torrents = await getTorrentsForPool(this.System, id)
-        return {
-            id,
-            name,
-            ticker,
-            torrents
-        }
-    }
-
-    async processPoolMember(event: any) {
-        const { poolId: poolBN, isMember } = event.args
-        const pool = poolBN.toString()
-
-        const { System } = this
-        const poolId = poolBN.toNumber()
-
-        if (isMember) {
-            const poolInfos = await System.getPoolInfoBatch([poolBN])
-            const torrents = await getTorrentsForPool(System, poolId)
-
-            const [
-                name,
-                ticker,
-            ] = [
-                poolInfos.names[0],
-                poolInfos.tickers[0],
-            ];
-            
-            this.pools[poolId] = {
-                poolId,
-                name,
-                ticker,
-                isMember: true,
-                torrents: torrents,
-            }
-        } else {
-            this.pools[poolId] = {
-                ...this.pools[poolId],
-                isMember: false,
-            }
-        }
-
-        this.emit('update', this.pools)
-    }
-
-    processTorrentEvent(event: any) {
-        const { poolId: poolBN, exactTopic, uri, live } = event.args
-        const pool = this.pools[poolBN.toString()]
-
-        if (!pool) {
-            debug(`Pool ${poolBN.toString()} not found`)
-            return
-        }
-
-        // TODO:axon verify exactTopic in URI
-        const torrentsSet = new Set()
-        pool.torrents.forEach((uri: string) => {
-            torrentsSet.add(uri)
-        })
-
-        if (live) {
-            torrentsSet.add(uri)
-        } else {
-            torrentsSet.delete(uri)
-        }
-        
-        pool.torrents = Array.from(torrentsSet)
-        this.pools[poolBN.toString()] = pool
-        this.emit('update', this.pools)
-    }
-}
-
-class TorrentEngine {
-    public torrentClient: WebTorrent
-    public torrents: Record<string, any>
-
-    constructor(
-        private stateEngine: StateEngine,
-        private privateKey: string,
-        private torrentPort: number
-    ) {
-        this.stateEngine = stateEngine
-        debug('starting WebTorrent on port ' + torrentPort)
-        this.torrentClient = new WebTorrent({
-            ethereumWallet: privateKey,
-            peerId: '1'.repeat(40),
-            tracker: true,
-            torrentPort,
-        })
-        this.torrents = {}
-    }
-
-    start() {
-        this.stateEngine.on('update', (pools) => {
-            debug('processing state update', pools)
-            const torrentURIs = new Set()
-
-            Object.values(pools).forEach((pool: any) => {
-                if(!pool.isMember) return
-
-                pool.torrents.forEach((uri: string) => {
-                    torrentURIs.add(uri)
-                })
-            })
-
-            // Stop torrents.
-            for (let [uri, torrent] of Object.entries(this.torrents)) {
-                if (!torrentURIs.has(uri)) {
-                    // Stop torrent.
-                    debug(`Stopping torrent: ${uri}`)
-                    const torrent = this.torrentClient.remove(uri)
-                    delete this.torrents[uri]
-                }
-            }
-
-            // Start torrents.
-            for (const uri of Array.from(torrentURIs)) {
-                if (this.torrents[uri]) {
-                    // debug(`Torrent already started: ${uri}`)
-                    continue
-                }
-
-                debug(`Adding torrent: ${uri}`)
-                const torrent = this.torrentClient.add(uri)
-                this.torrents[uri] = torrent
-            }
-        })
-    }
-}
-
+import { Pool, StateEngine } from '../state_engine';
+import { TorrentEngine } from '../torrent_engine';
+import fs from 'node:fs'
+const byteSize = require('byte-size')
 
 
 interface RunNodeArgs {
@@ -319,24 +52,6 @@ export async function runNode(argv: RunNodeArgs) {
         signer
     )
 
-    // const columns = 'Pool ID | Ticker | Name | Torrents'
-    //     .split(' | ')
-    
-    // const poolSummaryTable = [columns]
-    //     .concat(poolIds.map((id, i) => {
-    //         let fields = [
-    //             poolIds[i],
-    //             poolInfos.tickers[i],
-    //             poolInfos.names[i],
-    //             torrentsForPools[i].length
-    //         ]
-    //         return fields
-    //     }))
-
-    // debug(table(poolSummaryTable))
-    
-    // debug(`\nLoading torrents for ${signer.address}`)
-
     debug(`Starting torrent client`)
     debug(`Torrent data path: ${argv.torrentDataPath}`)
 
@@ -348,10 +63,87 @@ export async function runNode(argv: RunNodeArgs) {
     let torrentEngine = new TorrentEngine(
         stateEngine,
         PRIVATE_KEY,
-        argv.torrentPort
+        argv.torrentPort,
+        argv.torrentDataPath
     )
     torrentEngine.start()
 
-    await stateEngine.load(await signer.getAddress())
+
+    // TODO: visit all existing files in uploads/[infohash]/* and begin seeding them.
+    const uploadsDir = path.join(__dirname, '..', '..', 'uploads')
+    debug(`uploadsDir: ${uploadsDir}`)
+    const uploads = await fs.readdirSync(uploadsDir)
+    debug(`uploads: ${uploads}`)
+    for (let upload of uploads) {
+        const infoHash = upload
+        const uploadDir = path.join(uploadsDir, infoHash)
+        debug(`uploadDir: ${uploadDir}`)
+        const files = await fs.readdirSync(uploadDir)
+        debug(`files: ${files}`)
+        for (let file of files) {
+            const filePath = path.join(uploadDir, file)
+            debug(`filePath: ${filePath}`)
+            const torrent = await torrentEngine.torrentClient.seed(
+                filePath,
+                {
+                    path: uploadDir,
+                },
+                ready => {
+                    debug(`preload: seeding torrent ${torrent.infoHash}`)
+                    torrentEngine.torrents[torrent.infoHash] = torrent
+                }
+            )
+            
+        }
+    }
+
+
+
+    stateEngine.on('update', (pools: Record<string, any>) => {
+        const columns = 'Pool ID | Ticker | Name | Torrents'
+            .split(' | ')
+
+        const poolSummaryTable = [columns]
+            .concat(Object.values(pools).map((pool: Pool, i) => {
+                let fields = [
+                    pool.poolId,
+                    pool.ticker,
+                    pool.name,
+                    pool.torrents.map(torrent => {
+                        console.log(torrent)
+                        // Short form, first 4 bytes of exactTopic.
+                        const shortId = torrent.exactTopic.slice(0, 8)
+                        return shortId
+                    }).join(', ')
+                ]
+                return fields
+            }))
+
+        debug(table(poolSummaryTable))
+    })
+
+    setInterval(async () => {
+        const columns = 'Pool ID | Torrent | % downloaded | Peers | Downloaded | Uploaded'
+            .split(' | ')
+
+
+        const summary = [columns]
+            .concat(Object.values(torrentEngine.torrents).map((t, i) => {
+                const name = t.files && t.files[0] && t.files[0].name || t.infoHash
+                let fields = [
+                    'todo',
+                    name,
+                    (t.progress * 100).toFixed(2) + '%',
+                    t.numPeers,
+                    byteSize(t.downloaded).toString(),
+                    byteSize(t.uploaded).toString()
+                ]
+                return fields
+            }))
+
+        debug(table(summary))
+    }, 1000)
+
+    await stateEngine.load()
     stateEngine.listen()
 }

@@ -18,9 +18,9 @@
                     },
                     {
                         "indexed": true,
-                        "internalType": "string",
+                        "internalType": "bytes32",
                         "name": "name",
-                        "type": "string"
+                        "type": "bytes32"
                     },
                     {
                         "indexed": true,
@@ -68,9 +68,9 @@
                     },
                     {
                         "indexed": true,
-                        "internalType": "string",
+                        "internalType": "bytes32",
                         "name": "exactTopic",
-                        "type": "string"
+                        "type": "bytes32"
                     },
                     {
                         "indexed": false,
@@ -118,6 +118,11 @@
                         "internalType": "string",
                         "name": "exactTopic",
                         "type": "string"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "xtBytes",
+                        "type": "bytes32"
                     },
                     {
                         "internalType": "string",
@@ -487,8 +492,8 @@
                 "type": "function"
             }
         ],
-        "address": "0xcE0066b1008237625dDDBE4a751827de037E53D2",
-        "deployBlock": 245
+        "address": "0xe044814c9eD1e6442Af956a817c161192cBaE98F",
+        "deployBlock": 400
     },
     "AxonToken": {
         "version": 1,
@@ -803,7 +808,7 @@
                 "type": "function"
             }
         ],
-        "address": "0x87006e75a5B6bE9D1bbF61AC8Cd84f05D9140589",
-        "deployBlock": 247
+        "address": "0x4ff1f64683785E0460c24A4EF78D582C2488704f",
+        "deployBlock": 402
     }
 }

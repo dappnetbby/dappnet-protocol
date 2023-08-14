@@ -41,34 +41,6 @@ scripts/
 ### Setup.
 
 ```sh
-# npm install all packages.
-./scripts/install.sh
-# npm link relevant packages together.
-./scripts/link.sh
-```
-
-### Aggregator.
-
-```sh
-# Run the aggregator.
-npm run watch
-node --experimental-modules build/index.js
-```
-
-### Peer.
-
-```sh
-# Build library.
-cd axon-lib/
-npm run watch
-
-# Run client.
-cd webtorrent-cli/
-
-# Terminal 1: Locally seed a torrent.
-./seed.sh
-# Terminal 2: Download torrent from this local seed and other public trackers.
-./download.sh
 ```
 
 ### Protocol.
@@ -76,5 +48,5 @@ cd webtorrent-cli/
 ```sh
 cd protocol
 forge build
-niacin deploy -y System
+./deploy.sh anew
 ```
