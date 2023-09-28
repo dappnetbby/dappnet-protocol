@@ -1,0 +1,5 @@
+node_modules/
+downloads/**
+uploads/**
+example/**debug-log
+example/sintel.mp4
