@@ -1,0 +1,14 @@
+
+axon
+    <- webtorrent
+        <- bittorrent-protocol
+
+published packages:
+
+axon-bittorrent-protocol@3.4.2
+axon-webtorrent@3.4.2
+
+axon-bittorrent-protocol
+    forked from 3.4.2
+axon-webtorrent
+    forked from 1.3.2

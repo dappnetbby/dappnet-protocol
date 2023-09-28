@@ -3,12 +3,12 @@
 	url = https://github.com/foundry-rs/forge-std
 [submodule "lib/forge-std"]
 	branch = v1.6.0
-[submodule "proof-of-concept/webtorrent"]
-	path = proof-of-concept/webtorrent
-	url = https://github.com/dappnetbby/webtorrent
-[submodule "proof-of-concept/webtorrent-cli"]
-	path = proof-of-concept/webtorrent-cli
-	url = https://github.com/dappnetbby/webtorrent-cli
-[submodule "proof-of-concept/protocol/lib/niacin-contracts"]
-	path = proof-of-concept/protocol/lib/niacin-contracts
-	url = https://github.com/liamzebedee/niacin-contracts
+#[submodule "proof-of-concept/webtorrent"]
+#	path = proof-of-concept/webtorrent
+#	url = https://github.com/dappnetbby/webtorrent
+#[submodule "proof-of-concept/webtorrent-cli"]
+#	path = proof-of-concept/webtorrent-cli
+#	url = https://github.com/dappnetbby/webtorrent-cli
+#[submodule "proof-of-concept/protocol/lib/niacin-contracts"]
+#	path = proof-of-concept/protocol/lib/niacin-contracts
+#	url = https://github.com/liamzebedee/niacin-contracts

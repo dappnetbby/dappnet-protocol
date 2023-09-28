@@ -1,12 +1,13 @@
 {
-  "name": "axon-protocol-cli",
-  "version": "0.1.0-alpha",
+  "name": "axon-daemon",
+  "version": "0.1.0",
   "description": "",
   "main": "dist/axon.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "run": "node build/axon.js"
+    "run": "node build/axon.js",
+    "prepublish": "npm run build"
   },
   "files": [
     "bin/",
@@ -20,6 +21,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "abi-to-sol": "^0.8.0",
+    "axon-webtorrent": "^1.1.0",
     "byte-size": "^8.1.1",
     "chalk": "^4.1.2",
     "debug": "^4.3.4",

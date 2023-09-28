@@ -1,4 +1,3 @@
-import WebTorrent from 'webtorrent'
 import * as ethers from 'ethers'
 import deployments from '../contracts.json' assert { type: "json" };
 import { table } from 'table'

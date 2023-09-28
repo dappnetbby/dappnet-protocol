@@ -1,4 +1,4 @@
-import WebTorrent from 'webtorrent';
+import WebTorrent from 'axon-webtorrent';
 import * as ethers from 'ethers';
 import path from 'path';
 import debugLib from 'debug';
