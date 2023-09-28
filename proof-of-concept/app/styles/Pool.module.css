@@ -1,0 +1,150 @@
+
+
+
+.poolDetailCard {
+    border: 1px solid #eaeaea;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.poolOverview {
+    padding-bottom: 1.5rem;
+}
+
+.poolName {
+    font-size: 2.6rem;
+    padding-bottom: 0.5rem;
+    display: block;
+}
+
+.poolDescription {
+    font-size: 1.2rem;
+    display: inline-block;
+    padding-bottom: .5rem;
+}
+
+.poolTicker {
+    font-size: 1rem;
+    font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+}
+
+.poolMeta {
+    color: #a0a0a0;
+}
+
+.details1 {
+    /* two columns */
+    /* split 70-30 */
+    /* display: grid;
+    grid-template-columns: 70% 30%;
+    grid-gap: 1rem; */
+    display: flex;
+}
+
+.poolStats {
+    margin: 1rem;
+    border: none;
+    padding: 1rem;
+    margin-top: 0;
+        padding-top: 0;
+}
+
+.poolChart header {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.poolChartContainer {
+    /* border: 1px solid black; */
+    margin-right: 3rem;
+    border: 1px solid gray;
+}
+
+.statDetail {
+    padding-bottom: 1rem;
+}
+
+.statDetail header {
+    font-size: 1.3rem;
+    font-weight: 300;
+    padding-bottom: 0.5rem;
+}
+
+.statDetail span {
+    font-size: 1.6rem;
+    font-weight: 500;
+    font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+}
+
+.poolFiles {
+    border: 1px solid #eaeaea;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.poolFilesTable {
+    text-align: left;
+}
+
+.poolFilesTable th {
+    font-size: 1.2rem;
+    font-weight: 300;
+    padding-bottom: 0.5rem;
+}
+
+.poolFilesTable td {
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+}
+
+.poolFilesTable th, .poolFilesTable td {
+    padding-right: 1rem;
+}
+
+.poolFiles {
+    margin-bottom: 2rem;
+}
+
+.btn {
+    background-color: #1e1b1c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 50ms;
+}
+
+.btnLoading {
+    /* animate opacity fade in and out 250ms */
+    animation: fade 250ms;
+}
+
+.btn:hover {
+    background-color: #ff2a8d;
+    opacity: 0.8;
+}
+
+.btn:disabled {
+    /* background-color: #ff2a8d; */
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    background-color: #ff2a8d;
+    opacity: 0.5;
+}
+
+.btn:active {
+    background-color: #ff2a8d;
+    opacity: 0.8;
+}
+
+.btn:focus {
+    outline: none;
+}

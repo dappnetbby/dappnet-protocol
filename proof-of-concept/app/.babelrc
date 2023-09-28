@@ -1,0 +1,9 @@
+{
+  "presets": ["next/babel"],
+  // "overrides": [
+  //   {
+  //     "test": "./node_modules/webtorrent/",
+  //     "presets": []
+  //   }
+  // ]
+}
