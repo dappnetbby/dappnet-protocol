@@ -36,6 +36,8 @@
     "os": false
   },
   "dependencies": {
+    "bittorrent-protocol": "workspace:*",
+    "axonproto-lib": "workspace:*",
     "@chainsafe/libp2p-noise": "^12.0.2",
     "@koush/wrtc": "^0.5.3",
     "@libp2p/mplex": "^8.0.4",
@@ -48,7 +50,6 @@
     "@webtorrent/http-node": "^1.3.0",
     "addr-to-ip-port": "^1.5.1",
     "axon-bittorrent-protocol": "^3.4.2",
-    "axonproto-lib": "^0.1.0",
     "bitfield": "^4.0.0",
     "bittorrent-dht": "^10.0.1",
     "cache-chunk-store": "^3.2.2",

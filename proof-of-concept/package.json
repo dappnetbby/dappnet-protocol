@@ -1,0 +1,13 @@
+{
+  "name": "axon-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/aggregator",
+    "packages/axon-lib",
+    "packages/bittorrent-protocol",
+    "packages/bittorrent-tracker",
+    "packages/node",
+    "packages/webtorrent",
+    "packages/webtorrent-cli"
+  ]
+}
